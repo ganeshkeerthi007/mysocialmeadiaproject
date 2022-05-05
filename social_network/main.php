@@ -60,7 +60,7 @@
 	<div class="row">
 		<div class="col-sm-12">
 			<div class="well">
-				<center><h1 style="color: white;">Coding Cafe</h1></center>
+				<center><h1 style="color: white;">Socialmedia</h1></center>
 			</div>
 		</div>
 	</div>
