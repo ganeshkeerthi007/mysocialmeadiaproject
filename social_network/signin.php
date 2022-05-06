@@ -13,7 +13,7 @@
             .row .col-sm-12{width:100%; 
             	}
             .row .col-sm-12 .main-content{width:100%;           	
-            	height:100%;
+            	height:100%; 
             	}	
 	          }
 
