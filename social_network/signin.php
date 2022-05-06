@@ -8,7 +8,15 @@
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 </head>
-<style>
+<style> 
+	@media screen and (max-width: 600px){     	
+            .row .col-sm-12{width:100%; 
+            	}
+            .row .col-sm-12 .main-content{width:100%;           	
+            	height:100%;
+            	}	
+	          }
+
 	body{
 		overflow-x: hidden;
 	}
