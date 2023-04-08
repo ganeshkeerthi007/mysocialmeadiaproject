@@ -9,11 +9,15 @@ trigger:
 pool:
   vmImage: ubuntu-latest
 
-steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
+variables:
+  terraformstoragerg: 'storage_RG'
 
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+steps:
+- task: AzureCLI@2
+  displayName: 'Azure CLI '
+  inputs:
+    azureSubscription: 'Pay-As-You-Go (f3ce8f3b-d87a-4dc5-ae70-ea8c4785082b)'
+    scriptType: ps
+    scriptLocation: inlineScript
+    inlineScript: |
+     az group create --location eastus --name $(terraformstoragerg)
