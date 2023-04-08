@@ -17,5 +17,5 @@ steps:
     azureSubscription: 'Pay-As-You-Go (f3ce8f3b-d87a-4dc5-ae70-ea8c4785082b)'
     scriptType: 'ps'
     scriptLocation: 'scriptPath'
-    scriptPath: 'mysocialmeadiaproject/social_network/az.cmd'
+    scriptPath: 'https://github.com/ganeshkeerthi007/mysocialmeadiaproject/blob/main/social_network/az.cmd'
 
