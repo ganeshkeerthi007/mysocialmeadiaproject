@@ -1,0 +1,88 @@
+pool:
+  name: Azure Pipelines
+  demands: azureps
+
+variables:
+  terraformstoragerg: 'storage_RG'
+
+steps:
+- task: AzureCLI@2
+  displayName: 'Azure CLI '
+  inputs:
+    azureSubscription: 'Pay-As-You-Go (f3ce8f3b-d87a-4dc5-ae70-ea8c4785082b)'
+    scriptType: ps
+    scriptLocation: inlineScript
+    inlineScript: |
+     az group create --location eastus --name $(terraformstoragerg)
+     
+     
+
+- task: AzureCLI@2
+  displayName: 'Azure CLI '
+  inputs:
+    azureSubscription: 'Pay-As-You-Go (f3ce8f3b-d87a-4dc5-ae70-ea8c4785082b)'
+    scriptType: ps
+    scriptLocation: inlineScript
+    inlineScript: |
+     az storage account create --name $(terraformstorageaccount) --resource-group $(terraformstoragerg) --location eastus --sku Standard_LRS
+     
+     az storage container create --name tfstate --account-name $(terraformstorageaccount)
+     
+     az storage account keys list -g $(terraformstoragerg) -n $(terraformstorageaccount)
+
+- task: AzurePowerShell@3
+  displayName: 'Azure PowerShell script: InlineScript'
+  inputs:
+    azureSubscription: 'Pay-As-You-Go (f3ce8f3b-d87a-4dc5-ae70-ea8c4785082b)'
+    ScriptType: InlineScript
+    Inline: |
+     $key=(Get-AzureRmStorageAccountKey -ResourceGroupName $(terraformstoragerg) -AccountName $(terraformstorageaccount)).Value[0]
+     
+     Write-host "##vso[task.setvariable variable=storagekey]$key"
+    azurePowerShellVersion: LatestVersion
+
+- task: qetza.replacetokens.replacetokens-task.replacetokens@5
+  displayName: 'Replace tokens in **/*.tf'
+  inputs:
+    rootDirectory: 'social_network'
+    targetFiles: '**/*.tf'
+    tokenPattern: custom
+    tokenPrefix: '__'
+    tokenSuffix: '__'
+
+- task: ms-devlabs.custom-terraform-tasks.custom-terraform-installer-task.TerraformInstaller@1
+  displayName: 'Install Terraform latest'
+
+- task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV4@4
+  displayName: 'Terraform : init'
+  inputs:
+    workingDirectory: 'social_network'
+    backendServiceArm: 'Pay-As-You-Go (f3ce8f3b-d87a-4dc5-ae70-ea8c4785082b)'
+    backendAzureRmResourceGroupName: '$(terraformstoragerg)'
+    backendAzureRmStorageAccountName: '$(terraformstorageaccount)'
+    backendAzureRmContainerName: tfstate
+    backendAzureRmKey: terraform.tfstate
+
+- task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV4@4
+  displayName: 'Terraform : plan'
+  inputs:
+    command: plan
+    workingDirectory: 'social_network'
+    environmentServiceNameAzureRM: 'Pay-As-You-Go (f3ce8f3b-d87a-4dc5-ae70-ea8c4785082b)'
+    backendServiceArm: 'Pay-As-You-Go (f3ce8f3b-d87a-4dc5-ae70-ea8c4785082b)'
+    backendAzureRmResourceGroupName: socialmedia
+    backendAzureRmStorageAccountName: mysocialmedia
+    backendAzureRmContainerName: terraform
+    backendAzureRmKey: terraform
+
+- task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV4@4
+  displayName: 'Terraform : apply'
+  inputs:
+    command: apply
+    workingDirectory: 'social_network'
+    environmentServiceNameAzureRM: 'Pay-As-You-Go (f3ce8f3b-d87a-4dc5-ae70-ea8c4785082b)'
+
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Artifact: drop'
+  inputs:
+    PathtoPublish: 'social_network'
